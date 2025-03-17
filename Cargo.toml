@@ -1,0 +1,10 @@
+[package]
+name = "mural_server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.97"
+sha256 = "1.6.0"
+tokio = { version = "1.44.1", features = ["full"] }
+xdg = "2.5.2"
