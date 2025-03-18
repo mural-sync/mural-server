@@ -2,9 +2,9 @@ use std::collections::HashMap;
 
 use crate::Pool;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct State {
-    pub pools: HashMap<String, Pool>,
+    pools: HashMap<String, Pool>,
 }
 
 impl State {
@@ -25,5 +25,9 @@ impl State {
         }
 
         Ok(Self { pools })
+    }
+
+    pub fn get_pool(&self, pool_name: &str) -> Option<&Pool> {
+        self.pools.get(pool_name)
     }
 }

@@ -1,9 +1,9 @@
 use std::path::{Path, PathBuf};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Wallpaper {
-    pub file_path: PathBuf,
-    pub digest: String,
+    file_path: PathBuf,
+    digest: String,
 }
 
 impl Wallpaper {
@@ -11,5 +11,13 @@ impl Wallpaper {
         let file_path = file_path.as_ref().to_path_buf();
         let digest = sha256::try_digest(&file_path)?;
         Ok(Self { file_path, digest })
+    }
+
+    pub fn file_path(&self) -> &PathBuf {
+        &self.file_path
+    }
+
+    pub fn digest(&self) -> &String {
+        &self.digest
     }
 }
