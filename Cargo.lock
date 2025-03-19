@@ -855,6 +855,7 @@ dependencies = [
  "serde",
  "sha256",
  "tokio",
+ "tracing",
  "tracing-subscriber",
  "xdg",
 ]

@@ -1,6 +1,7 @@
 mod pool;
 use actix_web::{
     App, HttpResponse, HttpServer, Responder, get,
+    http::StatusCode,
     web::{self},
 };
 pub(crate) use pool::Pool;
@@ -19,25 +20,39 @@ struct Info {
 #[get("/pool/digest")]
 async fn pool_digest(info: web::Query<Info>, data: web::Data<State>) -> impl Responder {
     let pool_name = &info.pool_name;
-    let pool = data.get_pool(pool_name).unwrap();
-    let digest = pool.current_wallpaper().unwrap().digest().clone();
-    HttpResponse::Ok().body(digest)
+    let pool = match data.get_pool(pool_name) {
+        Some(pool) => pool,
+        None => return HttpResponse::build(StatusCode::NOT_FOUND).body("no such pool"),
+    };
+    let digest = match pool.current_wallpaper() {
+        Some(current_wallpaper) => current_wallpaper.digest().clone(),
+        None => {
+            tracing::info!("failed to get current wallpaper");
+            return HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).finish();
+        }
+    };
+    HttpResponse::build(StatusCode::OK).body(digest)
 }
 
 #[get("/pool/wallpaper")]
 async fn pool_wallpaper(info: web::Query<Info>, data: web::Data<State>) -> impl Responder {
-    let (extension, image_content) = web::block(move || {
-        let pool_name = info.pool_name.clone();
-        let pool = data.get_pool(&pool_name).unwrap();
-        let file_path = pool.current_wallpaper().unwrap().file_path();
-        (
-            file_path.extension().unwrap().to_string_lossy().to_string(),
-            std::fs::read(file_path).unwrap(),
-        )
-    })
-    .await
-    .unwrap();
-    HttpResponse::Ok()
+    let pool_name = &info.pool_name;
+    let pool = match data.get_pool(pool_name) {
+        Some(pool) => pool,
+        None => return HttpResponse::build(StatusCode::NOT_FOUND).body("no such pool"),
+    };
+    let file_path = match pool.current_wallpaper() {
+        Some(current_wallpaper) => current_wallpaper.file_path().clone(),
+        None => {
+            tracing::info!("failed to get current wallpaper");
+            return HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).finish();
+        }
+    };
+    let extension = file_path.extension().unwrap().to_string_lossy().to_string();
+    let image_content = web::block(move || std::fs::read(&file_path).unwrap())
+        .await
+        .unwrap();
+    HttpResponse::build(StatusCode::OK)
         .content_type(format!("image/{}", extension))
         .body(image_content)
 }
