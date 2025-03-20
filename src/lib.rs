@@ -58,6 +58,10 @@ async fn pool_wallpaper(info: web::Query<Info>, data: web::Data<State>) -> impl 
 }
 
 pub async fn run() -> Result<(), anyhow::Error> {
+	let port: u16 = std::env::var("MURAL_SERVER_PORT")
+    	.unwrap_or("46666".to_string())
+    	.parse::<u16>()?;
+
     let base_dirs = xdg::BaseDirectories::with_prefix("mural_server")?;
 
     let state = State::new(&base_dirs)?;
@@ -68,7 +72,7 @@ pub async fn run() -> Result<(), anyhow::Error> {
             .service(pool_wallpaper)
             .app_data(web::Data::new(state.clone()))
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind(("127.0.0.1", port))?
     .run()
     .await?;
 
