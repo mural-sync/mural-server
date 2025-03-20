@@ -17,6 +17,11 @@ struct Info {
     pool_name: String,
 }
 
+#[get("/interval")]
+async fn get_interval(data: web::Data<State>) -> impl Responder {
+    HttpResponse::build(StatusCode::OK).body(data.interval().to_string())
+}
+
 #[get("/pool/digest")]
 async fn pool_digest(info: web::Query<Info>, data: web::Data<State>) -> impl Responder {
     let pool_name = &info.pool_name;
@@ -73,6 +78,7 @@ pub async fn run() -> Result<(), anyhow::Error> {
 
     HttpServer::new(move || {
         App::new()
+            .service(get_interval)
             .service(pool_digest)
             .service(pool_wallpaper)
             .app_data(web::Data::new(state.clone()))

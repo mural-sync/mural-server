@@ -4,6 +4,7 @@ use crate::Pool;
 
 #[derive(Clone, Debug)]
 pub struct State {
+    interval: u32,
     pools: HashMap<String, Pool>,
 }
 
@@ -24,7 +25,11 @@ impl State {
             pools.insert(pool_name, pool);
         }
 
-        Ok(Self { pools })
+        Ok(Self { interval, pools })
+    }
+
+    pub fn interval(&self) -> u32 {
+        self.interval
     }
 
     pub fn get_pool(&self, pool_name: &str) -> Option<&Pool> {
