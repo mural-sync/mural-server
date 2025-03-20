@@ -10,7 +10,7 @@ pub struct Pool {
 }
 
 impl Pool {
-    const TIME_SPAN: u64 = 3600;
+    const TIME_SPAN: u64 = 60 * 10;
 
     pub fn new<P: AsRef<Path>>(pool_path: P) -> Result<Self, anyhow::Error> {
         let pool_path = pool_path.as_ref().to_path_buf();
