@@ -8,7 +8,7 @@ pub struct State {
 }
 
 impl State {
-    pub fn new(base_dirs: &xdg::BaseDirectories) -> Result<Self, anyhow::Error> {
+    pub fn new(base_dirs: &xdg::BaseDirectories, interval: u32) -> Result<Self, anyhow::Error> {
         let pools_path = base_dirs.get_config_home().join("pools");
 
         let mut pools = HashMap::new();
@@ -19,7 +19,7 @@ impl State {
             }
 
             let pool_name = pool_path.file_name().unwrap().to_string_lossy().to_string();
-            let pool = Pool::new(pool_path)?;
+            let pool = Pool::new(pool_path, interval)?;
 
             pools.insert(pool_name, pool);
         }

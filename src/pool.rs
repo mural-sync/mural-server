@@ -6,13 +6,12 @@ use crate::Wallpaper;
 
 #[derive(Clone, Debug)]
 pub struct Pool {
+    interval: u32,
     wallpapers: Vec<Wallpaper>,
 }
 
 impl Pool {
-    const TIME_SPAN: u64 = 60 * 10;
-
-    pub fn new<P: AsRef<Path>>(pool_path: P) -> Result<Self, anyhow::Error> {
+    pub fn new<P: AsRef<Path>>(pool_path: P, interval: u32) -> Result<Self, anyhow::Error> {
         let pool_path = pool_path.as_ref().to_path_buf();
 
         let mut wallpapers = vec![];
@@ -26,7 +25,10 @@ impl Pool {
             wallpapers.push(wallpaper);
         }
 
-        Ok(Self { wallpapers })
+        Ok(Self {
+            wallpapers,
+            interval,
+        })
     }
 
     pub fn current_wallpaper(&self) -> Option<&Wallpaper> {
@@ -38,7 +40,7 @@ impl Pool {
             .duration_since(std::time::UNIX_EPOCH)
             .expect("time went backwards")
             .as_secs()
-            / Self::TIME_SPAN;
+            / self.interval as u64;
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
         self.wallpapers.choose(&mut rng)
     }
