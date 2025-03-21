@@ -1,4 +1,7 @@
-use std::path::{Path, PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+};
 
 use crate::prelude::*;
 
@@ -8,6 +11,8 @@ const TARGET: &str = "mural_server::config";
 pub struct Config {
     #[serde(default = "default_port")]
     pub port: u16,
+
+    pub pools: HashMap<String, Vec<String>>,
 
     #[serde(skip)]
     pub wallpaper_paths: Vec<PathBuf>,
@@ -31,6 +36,7 @@ impl Config {
 
         let mut config: Config = toml::from_str(&config_file_content)?;
         config.wallpaper_paths = Self::wallpaper_paths()?;
+
         Ok(config)
     }
 
@@ -66,15 +72,6 @@ impl Config {
     }
 }
 
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            port: 46666,
-            wallpaper_paths: vec![],
-        }
-    }
-}
-
 fn default_port() -> u16 {
-    Config::default().port
+    46666
 }
