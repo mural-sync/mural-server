@@ -15,8 +15,8 @@ pub enum Error {
     #[error("failed to read the configuration: {0}")]
     ConfigRead(std::io::Error),
 
-    #[error("failed to find a data directory")]
-    DataHome,
+    #[error("failed to list wallpapers: {0}")]
+    WallpaperList(std::io::Error),
 
     #[error("{0}")]
     Custom(String),

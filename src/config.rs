@@ -47,9 +47,9 @@ impl Config {
         info!(target: TARGET, "loading wallpapers from '{}'", wallpapers_path.display());
 
         let wallpaper_paths = std::fs::read_dir(&wallpapers_path)
-            .unwrap()
+            .map_err(Error::WallpaperList)?
             .collect::<Result<Vec<std::fs::DirEntry>, _>>()
-            .unwrap()
+            .map_err(Error::WallpaperList)?
             .iter()
             .map(|dir_entry| dir_entry.path())
             .filter(|wallpaper_path| {
