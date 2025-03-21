@@ -40,7 +40,7 @@ impl Config {
 
 impl Default for Config {
     fn default() -> Self {
-        Self { port: 8080 }
+        Self { port: 46666 }
     }
 }
 
