@@ -1,12 +1,12 @@
 use std::process::ExitCode;
 
 fn main() -> ExitCode {
-	tracing_subscriber::fmt::init();
+    tracing_subscriber::fmt::init();
 
-	if let Err(e) = mural_server::run() {
-		eprintln!("error: {}", e);
-		return ExitCode::from(1);
-	}
+    if let Err(e) = mural_server::run() {
+        eprintln!("error: {}", e);
+        return ExitCode::from(1);
+    }
 
-	return ExitCode::SUCCESS;
+    return ExitCode::SUCCESS;
 }
