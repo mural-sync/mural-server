@@ -1,8 +1,8 @@
 use crate::prelude::*;
 
-pub fn load_dotenv() -> Result<()> {
-    const TARGET: &str = "mural_server::load_dotenv";
+const TARGET: &str = "mural_server::env";
 
+pub fn load_dotenv() -> Result<()> {
     info!(target: TARGET, "loading a .env file");
 
     match dotenvy::dotenv() {
