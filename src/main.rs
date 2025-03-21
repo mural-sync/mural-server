@@ -1,8 +1,12 @@
-#[tokio::main]
-async fn main() {
-    tracing_subscriber::fmt::init();
+use std::process::ExitCode;
 
-    if let Err(e) = mural_server::run().await {
-        eprintln!("error: {}", e);
-    }
+fn main() -> ExitCode {
+	tracing_subscriber::fmt::init();
+
+	if let Err(e) = mural_server::run() {
+		eprintln!("error: {}", e);
+		return ExitCode::from(1);
+	}
+
+	return ExitCode::SUCCESS;
 }
