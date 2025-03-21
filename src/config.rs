@@ -8,6 +8,9 @@ const TARGET: &str = "mural_server::config";
 pub struct Config {
     #[serde(default = "default_port")]
     pub port: u16,
+
+    #[serde(skip)]
+    pub wallpaper_paths: Vec<PathBuf>,
 }
 
 impl Config {
@@ -15,8 +18,8 @@ impl Config {
         let config_home_path = Self::config_home_path()?;
         let _ = std::fs::create_dir_all(&config_home_path);
         let config_file_path = config_home_path.join("config.toml");
-
         info!(target: TARGET, "loading configuration from '{}'", config_file_path.display());
+
         let config_file_content = match std::fs::read_to_string(config_file_path) {
             Ok(config_file_content) => config_file_content,
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
@@ -26,7 +29,32 @@ impl Config {
             Err(e) => return Err(Error::ConfigRead(e)),
         };
 
-        Ok(toml::from_str(&config_file_content)?)
+        let mut config: Config = toml::from_str(&config_file_content)?;
+        config.wallpaper_paths = Self::wallpaper_paths()?;
+        Ok(config)
+    }
+
+    fn wallpaper_paths() -> Result<Vec<PathBuf>> {
+        let data_home_path = Self::config_home_path()?;
+        let wallpapers_path = data_home_path.join("wallpapers");
+        let _ = std::fs::create_dir_all(&wallpapers_path);
+        info!(target: TARGET, "loading wallpapers from '{}'", wallpapers_path.display());
+
+        let wallpaper_paths = std::fs::read_dir(&wallpapers_path)
+            .unwrap()
+            .collect::<Result<Vec<std::fs::DirEntry>, _>>()
+            .unwrap()
+            .iter()
+            .map(|dir_entry| dir_entry.path())
+            .filter(|wallpaper_path| {
+                wallpaper_path
+                    .extension()
+                    .map(|extension| ["jpg", "jpeg", "png"].contains(&extension.to_str().unwrap()))
+                    .unwrap_or(false)
+            })
+            .collect();
+
+        Ok(wallpaper_paths)
     }
 
     fn config_home_path() -> Result<PathBuf> {
@@ -40,7 +68,10 @@ impl Config {
 
 impl Default for Config {
     fn default() -> Self {
-        Self { port: 46666 }
+        Self {
+            port: 46666,
+            wallpaper_paths: vec![],
+        }
     }
 }
 

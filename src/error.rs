@@ -15,6 +15,9 @@ pub enum Error {
     #[error("failed to read the configuration: {0}")]
     ConfigRead(std::io::Error),
 
+    #[error("failed to find a data directory")]
+    DataHome,
+
     #[error("{0}")]
     Custom(String),
 }
