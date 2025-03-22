@@ -15,7 +15,7 @@ impl Pool {
             for wallpaper_path in wallpaper_paths {
                 if wallpaper_path
                     .file_stem()
-                    .unwrap()
+                    .expect("files should always have a file stem")
                     .to_string_lossy()
                     .to_string()
                     == *wallpaper_name

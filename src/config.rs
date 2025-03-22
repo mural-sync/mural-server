@@ -58,7 +58,10 @@ impl Config {
             .filter(|wallpaper_path| {
                 wallpaper_path
                     .extension()
-                    .map(|extension| ["jpg", "jpeg", "png"].contains(&extension.to_str().unwrap()))
+                    .map(|extension| match extension.to_str() {
+                        Some(extension) => ["jpg", "jpeg", "png"].contains(&extension),
+                        None => false,
+                    })
                     .unwrap_or(false)
             })
             .collect();

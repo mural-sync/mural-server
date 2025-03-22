@@ -25,17 +25,22 @@ impl State {
     }
 
     pub fn current_wallpaper(&self, pool_name: &str) -> Result<&Wallpaper> {
-        let pool = self.pools.get(pool_name).unwrap();
+        let pool = self
+            .pools
+            .get(pool_name)
+            .ok_or(Error::PoolNotFound(pool_name.to_string()))?;
         let wallpapers = pool.wallpapers();
 
         let seed = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .unwrap()
+            .expect("should always success, as time would have gone backwards otherwise")
             .as_secs()
             / self.interval;
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
-        Ok(wallpapers.choose(&mut rng).unwrap())
+        Ok(wallpapers
+            .choose(&mut rng)
+            .ok_or(Error::PoolEmpty(pool_name.to_string()))?)
     }
 
     pub fn interval(&self) -> u64 {

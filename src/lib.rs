@@ -32,7 +32,23 @@ async fn interval(state: web::Data<State>) -> impl Responder {
 #[get("/api/pool/{pool_name}/digest")]
 async fn current_digest(path: web::Path<String>, state: web::Data<State>) -> impl Responder {
     let pool_name = path.into_inner();
-    let wallpaper = state.current_wallpaper(&pool_name).unwrap();
+    let wallpaper = match state.current_wallpaper(&pool_name) {
+        Ok(wallpaper) => wallpaper,
+        Err(Error::PoolNotFound(pool_name)) => {
+            return HttpResponse::build(StatusCode::NOT_FOUND)
+                .body(format!("there is no pool named '{}'", pool_name));
+        }
+        Err(Error::PoolEmpty(pool_name)) => {
+            error!("the current wallpaper of a pool was requested, but it is empty");
+            return HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).body(format!(
+                "the pool '{}' does not contain any wallpapers",
+                pool_name
+            ));
+        }
+        Err(_) => todo!(
+            "current_wallpaper returned an error that was not expected; you should handle the new error here"
+        ),
+    };
     let digest = wallpaper.digest().clone();
     HttpResponse::build(StatusCode::OK).body(digest)
 }
@@ -40,12 +56,42 @@ async fn current_digest(path: web::Path<String>, state: web::Data<State>) -> imp
 #[get("/api/pool/{pool_name}/wallpaper")]
 async fn current_wallpaper(path: web::Path<String>, state: web::Data<State>) -> impl Responder {
     let pool_name = path.into_inner();
-    let wallpaper = state.current_wallpaper(&pool_name).unwrap();
+    let wallpaper = match state.current_wallpaper(&pool_name) {
+        Ok(wallpaper) => wallpaper,
+        Err(Error::PoolNotFound(pool_name)) => {
+            return HttpResponse::build(StatusCode::NOT_FOUND)
+                .body(format!("there is no pool named '{}'", pool_name));
+        }
+        Err(Error::PoolEmpty(pool_name)) => {
+            error!("the current wallpaper of a pool was requested, but it is empty");
+            return HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR).body(format!(
+                "the pool '{}' does not contain any wallpapers",
+                pool_name
+            ));
+        }
+        Err(_) => todo!(
+            "current_wallpaper returned an error that was not expected; you should handle the new error here"
+        ),
+    };
     let file_path = wallpaper.file_path().clone();
-    let extension = file_path.extension().unwrap().to_string_lossy().to_string();
-    let image_content = web::block(move || std::fs::read(file_path).unwrap())
-        .await
-        .unwrap();
+    let extension = file_path
+        .extension()
+        .expect("files with no extension should be filtered out from the pool")
+        .to_string_lossy()
+        .to_string();
+    let image_content = match web::block(move || std::fs::read(file_path)).await {
+        Ok(Ok(image_content)) => image_content,
+        Ok(Err(e)) => {
+            error!("failed to read the wallpaper file: {}", e);
+            return HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
+                .body("failed to read the wallpaper file");
+        }
+        Err(e) => {
+            error!("blocking error: {}", e);
+            return HttpResponse::build(StatusCode::INTERNAL_SERVER_ERROR)
+                .body("internal server error");
+        }
+    };
     HttpResponse::build(StatusCode::OK)
         .content_type(format!("image/{}", extension))
         .body(image_content)
@@ -65,10 +111,10 @@ pub async fn run() -> Result<()> {
             .default_service(web::route().to(not_found))
     })
     .bind(("0.0.0.0", config.port()))
-    .unwrap()
+    .map_err(|e| Error::BindServer(e))?
     .run()
     .await
-    .unwrap();
+    .map_err(|_| Error::RunServer)?;
 
     Ok(())
 }

@@ -1,5 +1,15 @@
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("failed to bind the server: {0}")]
+    BindServer(std::io::Error),
+    #[error("failed to run the server")]
+    RunServer,
+
+    #[error("no pool named '{0}'")]
+    PoolNotFound(String),
+    #[error("the pool '{0}' does not contain any wallpapers")]
+    PoolEmpty(String),
+
     #[error("failed load a .env file: '{line_content}' on line {line_number} is invalid")]
     DotenvyParse {
         line_content: String,
@@ -17,6 +27,8 @@ pub enum Error {
 
     #[error("failed to list wallpapers: {0}")]
     WallpaperList(std::io::Error),
+    #[error("failed to generate the digest for a wallpaper: {0}")]
+    WallpaperDigest(String),
 
     #[error("{0}")]
     Custom(String),

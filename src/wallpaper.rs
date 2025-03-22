@@ -11,7 +11,8 @@ pub struct Wallpaper {
 impl Wallpaper {
     pub fn new<P: AsRef<Path>>(file_path: P) -> Result<Self> {
         let file_path = file_path.as_ref().to_path_buf();
-        let digest = sha256::try_digest(&file_path).unwrap();
+        let digest =
+            sha256::try_digest(&file_path).map_err(|e| Error::WallpaperDigest(e.to_string()))?;
         Ok(Self { digest, file_path })
     }
 
