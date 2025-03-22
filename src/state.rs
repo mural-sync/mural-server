@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::{Config, Pool, prelude::*};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct State {
     pools: HashMap<String, Pool>,
 }

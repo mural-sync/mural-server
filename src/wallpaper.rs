@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use crate::prelude::*;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Wallpaper {
     digest: String,
     file_path: PathBuf,

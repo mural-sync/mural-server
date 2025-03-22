@@ -1,4 +1,5 @@
 mod config;
+use actix_web::{App, HttpServer, web};
 pub(crate) use config::Config;
 
 mod env;
@@ -18,14 +19,17 @@ pub(crate) use state::State;
 mod wallpaper;
 pub(crate) use wallpaper::Wallpaper;
 
-pub fn run() -> Result<()> {
+pub async fn run() -> Result<()> {
     env::load_dotenv()?;
-
     let config = Config::load()?;
-    info!("using configuration {:?}", &config);
-
     let state = State::new(&config)?;
-    info!("using state {:?}", &state);
+
+    HttpServer::new(move || App::new().app_data(web::Data::new(state.clone())))
+        .bind(("0.0.0.0", config.port()))
+        .unwrap()
+        .run()
+        .await
+        .unwrap();
 
     Ok(())
 }

@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{Wallpaper, prelude::*};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Pool {
     wallpapers: Vec<Wallpaper>,
 }
