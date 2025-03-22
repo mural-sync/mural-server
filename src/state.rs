@@ -38,9 +38,9 @@ impl State {
             / self.interval;
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
 
-        Ok(wallpapers
+        wallpapers
             .choose(&mut rng)
-            .ok_or(Error::PoolEmpty(pool_name.to_string()))?)
+            .ok_or(Error::PoolEmpty(pool_name.to_string()))
     }
 
     pub fn interval(&self) -> u64 {

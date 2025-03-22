@@ -111,7 +111,7 @@ pub async fn run() -> Result<()> {
             .default_service(web::route().to(not_found))
     })
     .bind(("0.0.0.0", config.port()))
-    .map_err(|e| Error::BindServer(e))?
+    .map_err(Error::BindServer)?
     .run()
     .await
     .map_err(|_| Error::RunServer)?;

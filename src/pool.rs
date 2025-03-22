@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::{ffi::OsStr, path::PathBuf};
 
 use crate::{Wallpaper, prelude::*};
 
@@ -16,9 +16,7 @@ impl Pool {
                 if wallpaper_path
                     .file_stem()
                     .expect("files should always have a file stem")
-                    .to_string_lossy()
-                    .to_string()
-                    == *wallpaper_name
+                    == OsStr::new(wallpaper_name)
                 {
                     wallpapers.push(Wallpaper::new(wallpaper_path)?);
                     found = true;
