@@ -1,14 +1,1 @@
 /target
-
-/.direnv
-/result
-
-/flake.nix
-/flake.lock
-
-/docker
-
-/README.md
-/LICENSE
-
-/justfile
