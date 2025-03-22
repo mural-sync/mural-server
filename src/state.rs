@@ -4,6 +4,7 @@ use crate::{Config, Pool, prelude::*};
 
 #[derive(Clone, Debug)]
 pub struct State {
+    interval: u64,
     pools: HashMap<String, Pool>,
 }
 
@@ -15,7 +16,14 @@ impl State {
             pools.insert(pool_name.to_string(), pool);
         }
 
-        Ok(Self { pools })
+        Ok(Self {
+            interval: config.interval(),
+            pools,
+        })
+    }
+
+    pub fn interval(&self) -> u64 {
+        self.interval
     }
 
     pub fn pools(&self) -> &HashMap<String, Pool> {

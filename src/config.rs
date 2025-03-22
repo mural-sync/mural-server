@@ -12,6 +12,9 @@ pub struct Config {
     #[serde(default = "default_port")]
     port: u16,
 
+    #[serde(default = "default_interval")]
+    interval: u64,
+
     pools: HashMap<String, Vec<String>>,
 
     #[serde(skip)]
@@ -75,6 +78,10 @@ impl Config {
         self.port
     }
 
+    pub fn interval(&self) -> u64 {
+        self.interval
+    }
+
     pub fn pools(&self) -> &HashMap<String, Vec<String>> {
         &self.pools
     }
@@ -86,4 +93,8 @@ impl Config {
 
 fn default_port() -> u16 {
     46666
+}
+
+fn default_interval() -> u64 {
+    600
 }
