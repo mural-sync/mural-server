@@ -10,12 +10,12 @@ const TARGET: &str = "mural_server::config";
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
 pub struct Config {
     #[serde(default = "default_port")]
-    pub port: u16,
+    port: u16,
 
-    pub pools: HashMap<String, Vec<String>>,
+    pools: HashMap<String, Vec<String>>,
 
     #[serde(skip)]
-    pub wallpaper_paths: Vec<PathBuf>,
+    wallpaper_paths: Vec<PathBuf>,
 }
 
 impl Config {
@@ -35,12 +35,12 @@ impl Config {
         };
 
         let mut config: Config = toml::from_str(&config_file_content)?;
-        config.wallpaper_paths = Self::wallpaper_paths()?;
+        config.wallpaper_paths = Self::find_wallpaper_paths()?;
 
         Ok(config)
     }
 
-    fn wallpaper_paths() -> Result<Vec<PathBuf>> {
+    fn find_wallpaper_paths() -> Result<Vec<PathBuf>> {
         let data_home_path = Self::config_home_path()?;
         let wallpapers_path = data_home_path.join("wallpapers");
         let _ = std::fs::create_dir_all(&wallpapers_path);
@@ -69,6 +69,18 @@ impl Config {
             .or(xdg::BaseDirectories::with_prefix("mural-server")
                 .map(|base_dirs| base_dirs.get_config_home()))
             .map_err(|_| Error::ConfigHome)
+    }
+
+    pub fn port(&self) -> u16 {
+        self.port
+    }
+
+    pub fn pools(&self) -> &HashMap<String, Vec<String>> {
+        &self.pools
+    }
+
+    pub fn wallpaper_paths(&self) -> &Vec<PathBuf> {
+        &self.wallpaper_paths
     }
 }
 
