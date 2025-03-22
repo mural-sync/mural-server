@@ -33,7 +33,7 @@ impl State {
 
         let seed = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .expect("should always success, as time would have gone backwards otherwise")
+            .expect("should always succeed, as time would have gone backwards otherwise")
             .as_secs()
             / self.interval;
         let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
