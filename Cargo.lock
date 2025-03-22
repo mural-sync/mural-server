@@ -859,6 +859,8 @@ version = "0.1.0"
 dependencies = [
  "actix-web",
  "dotenvy",
+ "rand",
+ "rand_chacha",
  "serde",
  "sha256",
  "thiserror",

@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use crate::{Config, Pool, prelude::*};
+use rand::{SeedableRng, seq::IndexedRandom};
+
+use crate::{Config, Pool, Wallpaper, prelude::*};
 
 #[derive(Clone, Debug)]
 pub struct State {
@@ -22,11 +24,21 @@ impl State {
         })
     }
 
-    pub fn interval(&self) -> u64 {
-        self.interval
+    pub fn current_wallpaper(&self, pool_name: &str) -> Result<&Wallpaper> {
+        let pool = self.pools.get(pool_name).unwrap();
+        let wallpapers = pool.wallpapers();
+
+        let seed = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs()
+            / self.interval;
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
+
+        Ok(wallpapers.choose(&mut rng).unwrap())
     }
 
-    pub fn pools(&self) -> &HashMap<String, Pool> {
-        &self.pools
+    pub fn interval(&self) -> u64 {
+        self.interval
     }
 }
