@@ -1,0 +1,12 @@
+services:
+    mural_server:
+        container_name: mural_server
+        build:
+            context: ./
+            dockerfile: ./Dockerfile
+        ports:
+            - 46666:46666
+        volumes:
+            - ./mural_server_config:/config
+        environment:
+            - MURAL_SERVER_CONFIG_HOME=/config

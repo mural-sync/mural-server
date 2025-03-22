@@ -15,6 +15,7 @@ pub struct Config {
     #[serde(default = "default_interval")]
     interval: u64,
 
+    #[serde(default)]
     pools: HashMap<String, Vec<String>>,
 
     #[serde(skip)]
