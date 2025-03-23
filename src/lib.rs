@@ -1,4 +1,8 @@
+use std::path::PathBuf;
+
 use actix_web::{App, HttpResponse, HttpServer, Responder, get, http::StatusCode, web};
+
+mod cli;
 
 mod config;
 pub(crate) use config::Config;
@@ -99,7 +103,9 @@ async fn current_wallpaper(path: web::Path<String>, state: web::Data<State>) -> 
 
 pub async fn run() -> Result<()> {
     env::load_dotenv()?;
-    let config = Config::load()?;
+    let matches = cli::get_command().get_matches();
+    let custom_config_dir = matches.get_one::<PathBuf>("config-dir");
+    let config = Config::load(custom_config_dir)?;
     let state = State::new(&config)?;
 
     HttpServer::new(move || {
