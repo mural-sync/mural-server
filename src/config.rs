@@ -59,7 +59,7 @@ impl Config {
                 wallpaper_path
                     .extension()
                     .map(|extension| match extension.to_str() {
-                        Some(extension) => ["jpg", "jpeg", "png"].contains(&extension),
+                        Some(extension) => ["jpg", "jpeg", "png", "webp"].contains(&extension),
                         None => false,
                     })
                     .unwrap_or(false)
