@@ -8,14 +8,11 @@ use crate::prelude::*;
 const TARGET: &str = "mural_server::config";
 
 #[derive(Debug, serde::Deserialize, serde::Serialize)]
+#[serde(deny_unknown_fields)]
+#[serde(default)]
 pub struct Config {
-    #[serde(default = "default_port")]
     port: u16,
-
-    #[serde(default = "default_interval")]
     interval: u64,
-
-    #[serde(default)]
     pools: HashMap<String, Vec<String>>,
 
     #[serde(skip)]
@@ -95,10 +92,13 @@ impl Config {
     }
 }
 
-fn default_port() -> u16 {
-    46666
-}
-
-fn default_interval() -> u64 {
-    600
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            port: 46666,
+            interval: 300,
+            pools: HashMap::new(),
+            wallpaper_paths: vec![],
+        }
+    }
 }
