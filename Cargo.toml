@@ -10,6 +10,7 @@ repository = "https://github.com/mural-sync/mural-server"
 
 [dependencies]
 actix-web = "4.10.2"
+clap = { version = "4.5.32", features = ["cargo"] }
 dotenvy = "0.15.7"
 rand = "0.9.0"
 rand_chacha = "0.9.0"
