@@ -1,4 +1,4 @@
-name: Create release
+name: Build for musl
 
 on:
   workflow_dispatch:
@@ -39,6 +39,12 @@ jobs:
         with:
           target: ${{ matrix.target }}
 
+      - name: Install musl dependencies
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
+          
       - name: Build
         run: |
           cargo build --release --target ${{ matrix.target }}
