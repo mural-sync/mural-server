@@ -5,7 +5,6 @@ edition = "2024"
 authors = ["Silvan Schmidt <mail@silvanschmidt.ch>"]
 description = "Server software for the mural wallpaper service"
 license = "MIT"
-license-file = "LICENSE"
 repository = "https://github.com/mural-sync/mural-server"
 
 
