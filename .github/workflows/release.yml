@@ -1,0 +1,142 @@
+name: Create release
+
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+
+jobs:
+  define-matrix:
+    name: Define the target matrix
+    runs-on: ubuntu-latest
+
+    outputs:
+      targets: ${{ steps.targets.outputs.targets }}
+
+    steps:
+      - name: Define the target matrix
+        id: targets
+        run: |
+          echo 'targets=["x86_64-unknown-linux-gnu"]' >> "$GITHUB_OUTPUT"
+  
+  generate-changelog:
+    name: Generate changelog
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        uses: orhun/git-cliff-action@v4
+        id: git-cliff
+        with:
+          config: cliff.toml
+          args: -vv --latest --strip header
+        env:
+          OUTPUT: CHANGES.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Upload changelog artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog
+          path: CHANGES.md
+
+  build-binaries:
+    needs:
+      - define-matrix
+
+    strategy:
+      matrix:
+        target: ${{ fromJson(needs.define-matrix.outputs.targets) }}
+    
+    name: Build binary for ${{ matrix.target }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: Setup rust toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/${{ github.event.repository.name }}
+
+  create-release:
+    needs:
+      - generate-changelog
+    
+    name: Create the release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download changelog artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: changelog
+
+      - name: Create the release
+        run: |
+          gh release create --draft --title "Release ${{ github.ref_name }}" --notes-file CHANGES.md ${{ github.ref_name }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+  upload-binaries-to-release:
+    needs:
+      - build-binaries
+      - create-release
+      - define-matrix
+
+    strategy:
+      matrix:
+        target: ${{ fromJson(needs.define-matrix.outputs.targets) }}
+
+    name: Upload binary for ${{ matrix.target }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download binary artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.event.repository.name }}-${{ matrix.target }}
+
+      - name: Rename binary artifact
+        run: |
+          mv ${{ github.event.repository.name }} ${{ github.event.repository.name }}-${{ matrix.target }}
+
+      - name: Upload binary to release
+        run: |
+          gh release upload ${{ github.ref_name }} ${{ github.event.repository.name }}-${{ matrix.target }}
+        env:
+          GH_TOKEN: ${{ github.token }}
