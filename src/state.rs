@@ -46,4 +46,8 @@ impl State {
     pub fn interval(&self) -> u64 {
         self.interval
     }
+
+    pub fn pools(&self) -> &HashMap<String, Pool> {
+        &self.pools
+    }
 }

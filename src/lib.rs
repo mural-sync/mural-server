@@ -108,6 +108,22 @@ pub async fn run() -> Result<()> {
     let config = Config::load(custom_config_dir)?;
     let state = State::new(&config)?;
 
+    println!("pools:");
+    for (pool_name, pool) in state.pools() {
+        println!("  {}:", pool_name);
+        for wallpaper in pool.wallpapers() {
+            println!(
+                "  -> {}",
+                wallpaper
+                    .file_path()
+                    .file_stem()
+                    .unwrap()
+                    .to_string_lossy()
+                    .to_string()
+            );
+        }
+    }
+
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(state.clone()))
