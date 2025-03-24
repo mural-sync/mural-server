@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use rand::{SeedableRng, seq::IndexedRandom};
-
 use crate::{Config, Pool, Wallpaper, prelude::*};
 
 #[derive(Clone, Debug)]
@@ -31,16 +29,17 @@ impl State {
             .ok_or(Error::PoolNotFound(pool_name.to_string()))?;
         let wallpapers = pool.wallpapers();
 
-        let seed = std::time::SystemTime::now()
+        let timestamp = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .expect("should always succeed, as time would have gone backwards otherwise")
-            .as_secs()
-            / self.interval;
-        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
+            .as_secs();
 
-        wallpapers
-            .choose(&mut rng)
-            .ok_or(Error::PoolEmpty(pool_name.to_string()))
+        Ok(wallpapers
+            .get(
+                std::convert::TryInto::<usize>::try_into(timestamp % wallpapers.len() as u64)
+                    .expect("would only fail when there are a huge number of wallpapers"),
+            )
+            .expect("index should always be in range"))
     }
 
     pub fn interval(&self) -> u64 {

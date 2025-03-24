@@ -1,5 +1,7 @@
 use std::{ffi::OsStr, path::PathBuf};
 
+use rand::{SeedableRng, seq::SliceRandom};
+
 use crate::{Wallpaper, prelude::*};
 
 #[derive(Clone, Debug)]
@@ -26,6 +28,13 @@ impl Pool {
                 error!("could not find wallpaper '{}'", wallpaper_name);
             }
         }
+
+        let seed = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("should always succeed, as time would have gone backwards otherwise")
+            .as_secs();
+        let mut rng = rand_chacha::ChaCha8Rng::seed_from_u64(seed);
+        wallpapers.shuffle(&mut rng);
 
         Ok(Self { wallpapers })
     }
