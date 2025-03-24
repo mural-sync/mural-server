@@ -36,8 +36,10 @@ impl State {
 
         Ok(wallpapers
             .get(
-                std::convert::TryInto::<usize>::try_into(timestamp % wallpapers.len() as u64)
-                    .expect("would only fail when there are a huge number of wallpapers"),
+                std::convert::TryInto::<usize>::try_into(
+                    (timestamp / self.interval) % wallpapers.len() as u64,
+                )
+                .expect("would only fail when there are a huge number of wallpapers"),
             )
             .expect("index should always be in range"))
     }
